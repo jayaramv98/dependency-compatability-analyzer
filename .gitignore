@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# macOS
+.DS_Store
+
+# Python tooling
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs
+*.log
+
+# Chroma / local vector database
+chroma/
+chroma_db/
+
+# Generated data
+data/processed/
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+
+# Build / coverage
+coverage/
+htmlcov/
+
+# Temporary files
+*.tmp
