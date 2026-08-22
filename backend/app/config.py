@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     cohere_embed_api_url: str
     cohere_api_key: str
     cohere_embed_model: str
+
+    # ChromaDB configs
+    local_chroma_db_path: str = "./chroma_db"
+    django_chroma_collection: str = "django_release_notes"
     
     ## reads configs from .env file
     model_config = SettingsConfigDict(
@@ -17,5 +21,3 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
-
-print(settings.cohere_embed_api_url)

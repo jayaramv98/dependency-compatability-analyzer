@@ -6,6 +6,7 @@ from app.services.cohere_client import embed_query
 
 
 def main():
+
     # 1. Load and parse the release note
     file_path = "../data/raw/django/6.0.8.txt"
     print(f"Loading {file_path}...")

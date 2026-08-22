@@ -2,10 +2,9 @@ from pydantic import BaseModel
 from datetime import date
 
 ## For metadata filtering in the vector store
-## is_breaking (changes backward comptabile are false, non-compatible are true, None if unclassified)
+## is_breaking (changes backward comptabile/incompatible are false/true)
 ## True  = confirmed breaking
 ## False = confirmed non-breaking
-## None  = unknown / not classified
 class ChunkMetadata(BaseModel):
     technology: str
     version: str
@@ -13,8 +12,17 @@ class ChunkMetadata(BaseModel):
     version_minor: int
     version_patch: int
     release_date: date | None
+    release_date_ts: int = 0
     is_breaking: bool
     section_title: str
+
+    @model_validator(mode="after")
+    jdef compute_timestamp(self) -> "ChunkMetadata":
+        """Automatically calculates release_date_ts if release_date is present."""
+        if self.release_date and not self.release_date_ts:
+            dt = datetime.combine(self.release_date, time.min, tzinfo=timezone.utc)
+            self.release_date_ts = int(dt.timestamp())
+        return self
 
 ## For actual embedding in the vector store
 class Chunk(BaseModel):

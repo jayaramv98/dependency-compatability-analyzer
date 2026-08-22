@@ -6,11 +6,11 @@ client = cohere.ClientV2(
     api_key=settings.cohere_api_key
 )
 
-## function to embed the release notes/change logs into vectors
+## function to embed the release notes/change log list of chunks into vectors
 ## Document:
- ##texts = list[str]
+ ##texts = list[str] (list[chunks])
  ##input_type = search_document
- ##returns = list of vectors
+ ##returns = list of vectors (list[vectors])
 def embed_documents(texts: list[str]):
     response = client.embed(
         texts=texts,
