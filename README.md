@@ -15,3 +15,7 @@ to identify breaking changes between versions.
 ## Status
 
 🚧 Under development
+## activate venv
+source .venv/bin/activate
+## run fastAPI server (auto reload for changes)
+python -m uvicorn app.main:app --reload
