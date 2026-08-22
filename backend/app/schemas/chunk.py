@@ -1,5 +1,5 @@
-from pydantic import BaseModel
-from datetime import date
+from pydantic import BaseModel, model_validator
+from datetime import date, datetime, time, timezone
 
 ## For metadata filtering in the vector store
 ## is_breaking (changes backward comptabile/incompatible are false/true)
@@ -17,7 +17,7 @@ class ChunkMetadata(BaseModel):
     section_title: str
 
     @model_validator(mode="after")
-    jdef compute_timestamp(self) -> "ChunkMetadata":
+    def compute_timestamp(self) -> "ChunkMetadata":
         """Automatically calculates release_date_ts if release_date is present."""
         if self.release_date and not self.release_date_ts:
             dt = datetime.combine(self.release_date, time.min, tzinfo=timezone.utc)

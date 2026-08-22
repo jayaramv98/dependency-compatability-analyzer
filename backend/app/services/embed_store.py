@@ -85,7 +85,7 @@ class ChromaWriter:
         return total_count
 
 # handles querying/searching - vector similarity, metadata filtering from chroma-DB
- class ChromaReader:
+class ChromaReader:
     def __init__(self, collection_name: str = settings.django_chroma_collection or "django_release_notes"):
         self.client = chromadb.PersistentClient(path=settings.local_chroma_db_path)
         self.collection = self.client.get_or_create_collection(
