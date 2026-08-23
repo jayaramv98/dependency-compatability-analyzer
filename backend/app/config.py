@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     # ChromaDB configs
     local_chroma_db_path: str = "./chroma_db"
     django_chroma_collection: str = "django_release_notes"
+
+    # Google Gemini API key
+    gemini_api_key: str
     
     ## reads configs from .env file
     model_config = SettingsConfigDict(
