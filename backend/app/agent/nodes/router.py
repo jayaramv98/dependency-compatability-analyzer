@@ -89,7 +89,7 @@ Analyze the user's software question and extract precise filtering intents.
    - NEVER include framework names, version numbers, or words like "release notes" in `search_query` (these are handled by metadata filters).
 
 2. METADATA EXTRACTION:
-   - Extract framework into `technology`.
+   - Extract framework into `technology` (lowercase).
    - Extract major, minor, patch numbers into respective integer fields.
    - Extract version comparison operators ('>=', '<=', '==').
    - Set `is_breaking=True` if breaking changes or deprecations or incompatible are mentioned.

@@ -30,6 +30,7 @@ class QueryState(TypedDict):
     
     # 3. Retrieval results (Populated by the Retrieval Node)
     retrieved_chunks: List[Chunk]
+    
     # Retrieved chunk distance/score
     distances: Optional[List[float]]
     

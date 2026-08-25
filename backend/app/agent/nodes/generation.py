@@ -1,5 +1,7 @@
 # app/agent/nodes/generation.py
 
+### LLM node which formats the response back to the user
+
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI

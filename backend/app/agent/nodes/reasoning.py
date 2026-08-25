@@ -1,4 +1,6 @@
-# Evaluates whether chunks factually satisfy the question (is_relevant: bool).
+# Evaluates whether chunks factually satisfy the question
+# In v2, use MCP tool calling to GitHub MCP server, enhancing the reasoning node further
+
 from typing import Literal
 from pydantic import BaseModel, Field
 
@@ -20,7 +22,7 @@ class RelevanceResult(BaseModel):
     )
 
 # --- 2. Prompt & Model Setup ---
-REASONING_PROMPT = """You are a technical document relevance grader.
+REASONING_PROMPT = """You are a software technical document relevance grader.
 Review the user question and the retrieved documentation chunks.
 Identify which chunks contain relevant technical information to answer the question.
 
@@ -42,12 +44,13 @@ llm = ChatGoogleGenerativeAI(
     temperature=0
 )
 # gemini-3.5-flash-lite
-# gemini-3.1-pro-preview
+# gemini-3.1-pro-preview (no free tier API quota)
 
 structured_grader = llm.with_structured_output(RelevanceResult)
 grader_chain = grader_prompt | structured_grader
 
 # --- 4. Node Function ---
+# In v2, let the LLM evaluate the distance for grading relevance
 def evaluate_relevance(state: QueryState) -> dict:
     print("--- REASONING NODE: Evaluating Chunk Relevance ---")
     question = state["question"]
