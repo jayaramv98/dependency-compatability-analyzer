@@ -8,8 +8,10 @@ from pydantic import BaseModel
 }
 """
 class QueryRequest(BaseModel):
-    technology: str
-    question: str
+    question: str = Field(
+        description="The user query regarding dependency changes.",
+        examples=["What are the spatial lookup GIS GDALRaster changes in Django 6.0.8?"]
+    )
 
 """
 {

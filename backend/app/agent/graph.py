@@ -4,7 +4,7 @@
 from langgraph.graph import StateGraph, START, END
 from app.agent.state import QueryState
 
-# Import all your hard work!
+# Import all your nodes' core logic (main functions)
 from app.agent.nodes.router import route_query
 from app.agent.nodes.retrieval import retrieve_documents
 from app.agent.nodes.reasoning import evaluate_relevance
