@@ -112,7 +112,8 @@ class ChromaReader:
         """
         query_args = {
             "query_embeddings": [query_vector],
-            "n_results": top_k_results
+            "n_results": top_k_results,
+            "include": ["documents", "metadatas", "distances"]
         }
         if where:
             query_args["where"] = where
@@ -145,12 +146,18 @@ class ChromaReader:
         results = self.collection.query(**query_args)
 
         retrieved_chunks: List[Chunk] = []
+        # Create a separate list for the scores
+        distances: List[float] = []
+
         if results["documents"] and results["documents"][0]:
             docs = results["documents"][0]
             metas = results["metadatas"][0]
+            dists = results.get("distances", [[0.0]])[0]
 
-            for doc_text, meta_dict in zip(docs, metas):
+            for doc_text, meta_dict, dist in zip(docs, metas, dists):
                 metadata_model = self._from_chroma_metadata(meta_dict)
                 retrieved_chunks.append(Chunk(text=doc_text, metadata=metadata_model))
+                distances.append(dist)
 
-        return retrieved_chunks
+        # Return both as a tuple
+        return retrieved_chunks, distances

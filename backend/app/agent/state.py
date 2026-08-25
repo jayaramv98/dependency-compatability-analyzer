@@ -1,3 +1,5 @@
+### The state variable that the langgraph nodes are based on
+
 from typing import List, Optional, TypedDict
 from app.schemas.chunk import Chunk
 
@@ -28,6 +30,8 @@ class QueryState(TypedDict):
     
     # 3. Retrieval results (Populated by the Retrieval Node)
     retrieved_chunks: List[Chunk]
+    # Retrieved chunk distance/score
+    distances: Optional[List[float]]
     
     # 4. Final output (Populated by the Generation Node)
     answer: str

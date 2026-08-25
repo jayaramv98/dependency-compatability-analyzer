@@ -1,3 +1,4 @@
+# Extracts query terms, versions, operators, and breaking change flags.
 from typing import Optional, Literal
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
