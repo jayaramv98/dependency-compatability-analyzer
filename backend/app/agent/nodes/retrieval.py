@@ -9,50 +9,7 @@ from app.config import settings
 ## We will put the User Query embedding & Vector DB retrieval logic here
 ## Uses Cohere Embed service to embed query
 ## Uses dynamic operator mapping (LLM generated) for version in Chroma DB collection
-## Applies Semantic similarity search + metadata filtering to retrieve relevant top 10 chunks
-
-"""
-Yes! While that logic is beautifully constructed for the "happy path" (a standard forward-moving upgrade), there are three specific edge cases where this exact code block will either leak irrelevant data or fail completely.
-
-Here are the blindspots in that logic:
-
-### 1. The "Patch Version" Blindspot
-
-The most significant gap in this code is that it completely ignores `version_patch`.
-
-* **The Scenario:** A user upgrades from `4.2.8` to `6.0.1`.
-* **What the logic does:** The start boundary evaluates to `major == 4 AND minor >= 2`.
-* **The Bug:** Because it only checks the minor version, ChromaDB will return chunks for `4.2.0`, `4.2.1`, `4.2.2`, etc.
-* **Why it matters:** The user is already on `4.2.8`. They have already absorbed all the CVE fixes and bug fixes from `4.2.1`. Your pipeline will now flag vulnerabilities to the user that they are already protected against, creating false-positive noise.
-* **The Fix:** The start boundary needs nested `$or` logic to handle the specific patch of the starting minor version: *(major == 4 AND minor == 2 AND patch > 8) OR (major == 4 AND minor > 2)*.
-
-### 2. The "Downgrade" (Rollback) Scenario
-
-This code strictly assumes that time flows forward (`target_major > curr_major`).
-
-* **The Scenario:** A user realizes Django 6.0 breaks their app, so they ask, *"What are the breaking changes if I downgrade from 6.0 to 5.2?"*
-* **What the logic does:**
-* `target_major` (5) minus `curr_major` (6) is `-1`. The intermediate block is skipped.
-* Start boundary looks for `major == 6 AND minor >= 0`.
-* Target boundary looks for `major == 5 AND minor <= 2`.
-
-
-* **The Bug:** It fetches features added in 6.1 (which the user doesn't care about) and very old features from 5.1 (which the user also doesn't care about), completely missing the actual diff between 6.0 and 5.2.
-* **The Fix:** You need a quick check at the very beginning of the router to swap `curr` and `target` variables if the user is downgrading, or a dedicated downgrade logic block.
-
-### 3. The "Same Major Version" Assumption
-
-Your code snippet starts with `else:`, which implies there is an `if curr_major == target_major:` block right above it.
-
-* **The Scenario:** Upgrading from `4.2` to `4.8`.
-* **The Bug:** If that preceding `if` block doesn't exist (or doesn't handle the logic perfectly), this `else` block will execute. The intermediate block will be skipped (`4 - 4 = 0`), but the start and end boundaries will clash, resulting in duplicate or conflicting `$or` conditions.
-
-### 4. Alpha / Beta / Release Candidates
-
-If your database includes pre-releases (e.g., `6.0.0-rc1` or `6.0a1`), integer-based minor/patch comparisons will crash if your ingestion script didn't normalize those alpha/beta tags into a separate `is_prerelease` metadata boolean.
-
-Do you want to write the nested logic to fix the Patch Version blindspot, or are you comfortable letting the Reasoning Node (Gemini) figure out those patch discrepancies on the fly?
-"""
+## Applies Semantic similarity search + metadata filtering to retrieve relevant top 5 chunks
 
 def build_chroma_filter(state: QueryState) -> Dict[str, Any]:
     """

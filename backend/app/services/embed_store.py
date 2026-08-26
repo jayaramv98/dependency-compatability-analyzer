@@ -1,4 +1,5 @@
 import hashlib
+import time
 from typing import List, Optional
 import chromadb
 
@@ -48,9 +49,8 @@ class ChromaWriter:
         return raw_dict
 
     # Main function which actually stores logically chunked data vectors & metadata into the DB collection
-    # Cohere embed model v4.0 supports 2000 chunks/docs per API call
-    # TODO cohere's embed v4.0 model - add syntax & limits
-    def store_chunks(self, chunks: List[Chunk], batch_size: int = 500) -> int:
+    # Cohere's embed v2API for modelv4.0 has a limit of 96 texts per request on certain tiers
+    def store_chunks(self, chunks: List[Chunk], batch_size: int = 96) -> int:
         """Batches chunks, embeds via Cohere service, and stores them in ChromaDB."""
         if not chunks:
             print("No chunks provided to store.")
@@ -58,18 +58,37 @@ class ChromaWriter:
 
         print(f"Starting vector ingestion for {len(chunks)} chunks...")
 
-        for i in range(0, len(chunks), batch_size):
-            batch = chunks[i : i + batch_size]
-            print(f"Embedding and storing batch {i + 1} to {i + len(batch)}...")
+        # Pre-compute IDs for all incoming chunks
+        chunk_to_id = [(chunk, self._generate_chunk_id(chunk.text, chunk.metadata.version)) for chunk in chunks]
+        
+        # Deduplicate chunks that are already in ChromaDB to save Cohere API calls
+        new_chunks_with_ids = []
+        for chunk, chunk_id in chunk_to_id:
+            # Check if this ID already exists in the DB
+            existing = self.collection.get(ids=[chunk_id])
+            if not existing["ids"]:
+                new_chunks_with_ids.append((chunk, chunk_id))
+        
+        skipped = len(chunks) - len(new_chunks_with_ids)
+        if skipped > 0:
+            print(f"Skipping {skipped} chunks that already exist in ChromaDB.")
+
+        if not new_chunks_with_ids:
+            print("No new chunks to embed and store.")
+            return self.collection.count()
+
+        for i in range(0, len(new_chunks_with_ids), batch_size):
+            batch = new_chunks_with_ids[i : i + batch_size]
+            print(f"Embedding and storing new batch {i + 1} to {i + len(batch)} (out of {len(new_chunks_with_ids)} new chunks)...")
 
             documents: List[str] = []
             metadatas: List[dict] = []
             ids: List[str] = []
 
-            for chunk in batch:
+            for chunk, chunk_id in batch:
                 documents.append(chunk.text)
                 metadatas.append(self._to_chroma_metadata(chunk.metadata))
-                ids.append(self._generate_chunk_id(chunk.text, chunk.metadata.version))
+                ids.append(chunk_id)
 
             embeddings = embed_documents(texts=documents)
 
@@ -79,6 +98,12 @@ class ChromaWriter:
                 metadatas=metadatas,
                 embeddings=embeddings
             )
+
+            # Sleep slightly to respect Cohere's Free Tier 100k token/minute rate limit.
+            # 96 chunks * ~200 tokens = ~19.2k tokens per batch. Wait 12 seconds to pace it.
+            if i + batch_size < len(new_chunks_with_ids):
+                print("Sleeping for 12 seconds to respect Cohere rate limits...")
+                time.sleep(12)
 
         total_count = self.collection.count()
         print(f"Ingestion complete. Total items in collection: {total_count}")
