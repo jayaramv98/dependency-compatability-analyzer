@@ -1,9 +1,8 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 """
 {
-  "technology": "python",
   "question": "My system currently uses 3.10. What are the breaking changes from 3.10 to 3.14.7?"
 }
 """
@@ -14,9 +13,10 @@ class QueryRequest(BaseModel):
     )
 
 """
-{
-  "answer": "LLM generated respone for breaking changes from 3.10 to 3.14.7"
-}
+The structured response generated from RAG pipeline & LLM
 """
 class QueryResponse(BaseModel):
-    answer: str    
+    summary: str
+    breaking_changes: list[str] = []
+    security_impact: list[str] = []
+    developer_actions: list[str] = []

@@ -69,7 +69,13 @@ def generate_answer(state: QueryState) -> dict:
     if not chunks:
         print(" > No relevant chunks available for generation.")
         fallback_msg = "No relevant release notes or documentation chunks were found matching your query."
-        return {"answer": fallback_msg}
+        return {
+            "answer": fallback_msg,
+            "summary": fallback_msg,
+            "breaking_changes": [],
+            "security_impact": [],
+            "developer_actions": []
+        }
 
     # Format the verified context
     formatted_context = "\n\n---\n\n".join(
@@ -109,7 +115,13 @@ def generate_answer(state: QueryState) -> dict:
     final_answer = "\n".join(markdown_output).strip()
     
     print(f" > Report generated (Confidence: {report.confidence_score}).\n")
-    return {"answer": final_answer}
+    return {
+        "answer": final_answer,
+        "summary": report.summary,
+        "breaking_changes": report.breaking_changes,
+        "security_impact": report.security_impact,
+        "developer_actions": report.developer_actions
+    }
 
 
 # --- 4. Isolated Unit Test ---

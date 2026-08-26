@@ -36,6 +36,10 @@ class QueryState(TypedDict):
     
     # 4. Final output (Populated by the Generation Node)
     answer: str
+    summary: str
+    breaking_changes: List[str]
+    security_impact: List[str]
+    developer_actions: List[str]
 
 """ 
 Data flows linearly (or cyclically) through the QueryState.

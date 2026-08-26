@@ -1,0 +1,68 @@
+<div class="analyzer-container">
+    <h2>Dependency Compatibility Analyzer</h2>
+
+    <div class="search-box">
+        <textarea [formControl]="queryControl"
+            placeholder="e.g., What are the spatial lookup GIS GDALRaster changes in Django 6.0.8?" rows="3"></textarea>
+
+        <button (click)="runAnalysis()">
+            @if (isLoading) {
+            Analyzing Context...
+            } @else {
+            Analyze Context
+            }
+        </button>
+    </div>
+
+    <!-- Error State -->
+    @if (errorMessage) {
+    <div class="error-message">
+        {{ errorMessage }}
+    </div>
+    }
+
+    <!-- Result State -->
+    @if (result; as res) {
+    <div class="result-card">
+        @if (res.summary) {
+        <div class="result-section">
+            <h3>Summary</h3>
+            <p>{{ res.summary }}</p>
+        </div>
+        }
+
+        @if (res.breaking_changes && res.breaking_changes.length > 0) {
+        <div class="result-section warning">
+            <h3>⚠️ Breaking Changes</h3>
+            <ul>
+                @for (item of res.breaking_changes; track $index) {
+                <li>{{ item }}</li>
+                }
+            </ul>
+        </div>
+        }
+
+        @if (res.security_impact && res.security_impact.length > 0) {
+        <div class="result-section danger">
+            <h3>🔒 Security Impacts & CVEs</h3>
+            <ul>
+                @for (item of res.security_impact; track $index) {
+                <li>{{ item }}</li>
+                }
+            </ul>
+        </div>
+        }
+
+        @if (res.developer_actions && res.developer_actions.length > 0) {
+        <div class="result-section info">
+            <h3>🛠️ Developer Guidance</h3>
+            <ul>
+                @for (item of res.developer_actions; track $index) {
+                <li>{{ item }}</li>
+                }
+            </ul>
+        </div>
+        }
+    </div>
+    }
+</div>

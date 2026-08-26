@@ -32,11 +32,11 @@ async def invokeAgent(payload: QueryRequest):
         # 2. Invoke the compiled LangGraph workflow (async)
         final_state = await agent_executor.ainvoke(initial_state)
 
-        # 3. Extract results
-        final_answer = final_state.get("answer", "No analysis could be generated.")
-        
         return QueryResponse(
-            answer=final_answer,
+            summary=final_state.get("summary", "No analysis could be generated."),
+            breaking_changes=final_state.get("breaking_changes", []),
+            security_impact=final_state.get("security_impact", []),
+            developer_actions=final_state.get("developer_actions", [])
         )
 
     except Exception as e:
